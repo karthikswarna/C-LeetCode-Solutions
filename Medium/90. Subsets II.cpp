@@ -28,7 +28,7 @@ public:
 
         for(int i = begin; i < nums.size(); i++)
         {
-            if(i == begin || nums[i] != nums[i - 1])
+            if(i == begin || nums[i] != nums[i - 1]) // Important condition.
             {
                 subset.push_back(nums[i]);
                 generateSubsets(nums, subset, result, i + 1);
