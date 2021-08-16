@@ -2,82 +2,52 @@ class Solution {
 public:
     string minWindow(string s, string t)
     {
-        int m = s.size();
-        int n = t.size();
+        if(t.size() > s.size()) return "";
 
-        if(n > m) return "";
-        
-        
-        // Create Hash Table for t.
+
+        // Build a map on count of characters in t. Vector can be used for better performance.
         unordered_map<char, int> T;
-        for(int i = 0; i < n; i++)
-        {
-            if(T.find(t[i]) != T.end())
-                T[t[i]]++;
-            else
-                T[t[i]] = 1;
-        }
-        
-        bool found = false;
-        int left = 0;        
-        int minLeft = -1;
-        int minRight = -1;
+        for(auto &i: t)
+            ++T[i];
+    
         int minLen = INT_MAX;
+        int ansStart = INT_MAX;
+        int ansEnd = INT_MAX;
+
         unordered_map<char, int> S;
-        unordered_map<char, int> temp = T;
-        for(int right = 0; right < m; right++)
+        int windowStart = 0;
+        
+        // Use the Dynamic Sliding Window technique.
+        for(int windowEnd = 0; windowEnd < s.size(); ++windowEnd)
         {
-            // Update the S hash table.
-            if(S.find(s[right]) != S.end())
-                S[s[right]]++;
-            else
-                S[s[right]] = 1;
+            ++S[s[windowEnd]];
             
-            // Keep updating the temp T map wrt s if matches are found.
-            if(temp.find(s[right]) != temp.end())
+            // Shrinking the window from the start, to get the minimum possible window.
+            while(contains(S, T))
             {
-                temp[s[right]]--;
-                
-                if(temp[s[right]] == 0)
-                    temp.erase(s[right]);
-            }
-            
-            // If all t's characters are found.
-            if(temp.empty())
-            {
-                found = true;
-            // Shrink the window size from left till all t's characters are remained.
-                while(left <= right)
+                if(windowEnd - windowStart + 1 < minLen)
                 {
-                    if(minLen > right - left + 1)
-                    {
-                        minLen = right - left + 1;
-                        minLeft = left;
-                        minRight = right;
-                    }
-
-                    S[s[left]]--;
-
-                    left++;
-                    
-                    // Checking if (left, right) pair is minimum subarray.
-                    int flag = 0;
-                    for(auto i : T)
-                    {
-                        if(S[i.first] < i.second)
-                        {
-                            flag = 1;
-                            break;
-                        }
-                    }
-                    if(flag == 1)
-                        break;
+                    minLen = windowEnd - windowStart + 1;
+                    ansStart = windowStart;
+                    ansEnd = windowEnd;
                 }
-                
-                temp[s[left - 1]] = 1;
+
+                --S[s[windowStart]];
+                ++windowStart;
             }
         }
         
-        return found == true ? s.substr(minLeft, minRight - minLeft + 1) : "";
+        return ansStart == INT_MAX ?  ""  :  s.substr(ansStart, ansEnd - ansStart + 1);
+    }
+    
+    bool contains(unordered_map<char, int> &S, unordered_map<char, int> &T)
+    {
+        for(auto &pair: T)
+        {
+            if(S[pair.first] < pair.second)
+                return false;
+        }
+        
+        return true;
     }
 };
