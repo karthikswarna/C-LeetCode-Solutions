@@ -13,70 +13,55 @@ public:
     ListNode* reverseKGroup(ListNode* head, int k)
     {
         if(k == 1) return head;
-
-        ListNode* curr = head;
-        ListNode* prevEnd = NULL;
-        ListNode* khead = head;
-        ListNode* newListHead = head;
-
+        
         int count = 1;
-        bool firstReversal = true;
+        ListNode* curr = head;
+        ListNode* kHead = head;         // Head of current k-group list.
+        ListNode* prevKTail = head;     // Tail of previous k-group list.
+        ListNode* newListHead = NULL;
+
         while(curr != NULL)
         {
-            curr = curr->next;
-            
-            if(curr != NULL)
-                count++;
-            else
-                break;
-            
             if(count == k)
             {
-                ListNode* temp = curr->next;
+                // Store the next node, as links will be modified in reverse();
+                ListNode* nextKHead = curr->next;
+                reverse(kHead, curr);
 
-                // Link the reversed list with preceding part of full list.
-                if(firstReversal)
-                {
-                    // Remember the first part's head to return.
-                    newListHead = reverseList(khead, curr);
-                    firstReversal = false;
-                }
-                else
-                    prevEnd->next = reverseList(khead, curr);
+                // curr is the head of reversed list.
+                if(newListHead == NULL) newListHead = curr;
+                if(prevKTail != NULL) prevKTail->next = curr;
 
-                
-                // Link the reversed list with succeeding part of full list.
-                prevEnd = khead;
-                khead->next = temp;
-                
-                // Reset variables for next k-length part.
-                khead = temp;
-                curr = temp;
+                // kHead is the tail of reversed list.
+                prevKTail = kHead;
+                kHead->next = nextKHead;
+                kHead = nextKHead;
+
                 count = 1;
+                curr = nextKHead;
+            }
+            else
+            {
+                ++count;
+                curr = curr->next;
             }
         }
         
         return newListHead;
     }
     
-    // Reverses the list from start node to end node (both inclusive). Returns the head.
-    ListNode* reverseList(ListNode* start, ListNode* end)
+    void reverse(ListNode* start, ListNode* end)
     {
         ListNode* prev = start;
         ListNode* curr = start->next;
-        ListNode* temp;
-
-        while(true)
+        
+        start->next = NULL;
+        while(prev != end)
         {
-            temp = curr->next;
+            ListNode* temp = curr->next;
             curr->next = prev;
             prev = curr;
             curr = temp;
-            
-            if(prev == end)
-                break;
         }
-        
-        return end;
     }
 };
